@@ -1,2 +1,2 @@
 # quick
-Quick and simple C++ GUIs using ImGui and ImPlot
+Quick and simple C++ GUIs using Dear ImGui and ImPlot.

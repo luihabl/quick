@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 3.14)
 
 project(quick)
 
+include(FetchContent)
+
 # C++ version ===========================================================================
 
 set(CMAKE_CXX_STANDARD 17)
@@ -17,7 +19,7 @@ set(QUICK_LIBS "")
 set(QUICK_SOURCE "")
 set(QUICK_INCLUDES "")
 
-
+set(FETCHCONTENT_QUIET FALSE)
 
 #Dear ImGui
 FetchContent_Declare(
@@ -26,7 +28,6 @@ FetchContent_Declare(
     GIT_TAG           origin/docking
 )
 FetchContent_MakeAvailable(imgui)
-set(QUICK_LIBS ${QUICK_LIBS} imgui)
 set(QUICK_INCLUDES ${QUICK_INCLUDES} 
     ${imgui_SOURCE_DIR}
     ${imgui_SOURCE_DIR}/backends    
@@ -37,16 +38,16 @@ set(QUICK_SOURCE ${QUICK_SOURCE}
     ${imgui_SOURCE_DIR}/imgui_draw.cpp
     ${imgui_SOURCE_DIR}/imgui_tables.cpp
     ${imgui_SOURCE_DIR}/imgui_widgets.cpp
-    ${imgui_SOURCE_DIR}/imgui_impl_opengl3.cpp
+    ${imgui_SOURCE_DIR}/backends/imgui_impl_opengl3.cpp
 )
 
 if(QUICK_PLATFORM_GLFW)
     set(QUICK_SOURCE ${QUICK_SOURCE}
-        ${imgui_SOURCE_DIR}/imgui_impl_glfw.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_glfw.cpp
     )
 elseif(QUICK_PLATFORM_SDL2)
     set(QUICK_SOURCE ${QUICK_SOURCE}
-        ${imgui_SOURCE_DIR}/imgui_impl_sdl.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.cpp
     )
 endif()
 
@@ -59,7 +60,6 @@ FetchContent_Declare(
     GIT_TAG           origin/master
 )
 FetchContent_MakeAvailable(implot)
-set(QUICK_LIBS ${QUICK_LIBS} implot)
 set(QUICK_INCLUDES ${QUICK_INCLUDES} 
     ${implot_SOURCE_DIR}
 )
@@ -72,15 +72,13 @@ set(QUICK_SOURCE ${QUICK_SOURCE}
 
 
 #Glad
-FetchContent_Declare(
-    glad
-    GIT_REPOSITORY   https://github.com/Dav1dde/glad.git
+set(QUICK_SOURCE ${QUICK_SOURCE}
+    external/glad/src/glad.c    
 )
-set(GLAD_PROFILE "core" CACHE STRING "OpenGL profile")
-set(GLAD_API "gl=3.3,gles=" CACHE STRING "API type/version pairs, like \"gl=3.2,gles=\", no version means latest")
-set(GLAD_GENERATOR "c" CACHE STRING "Language to generate the binding for")
-set(QUICK_LIBS ${QUICK_LIBS} glad)
-FetchContent_MakeAvailable(glad)
+set(QUICK_INCLUDES ${QUICK_INCLUDES} 
+    external/glad/include
+)
+
 
 
 
@@ -100,7 +98,7 @@ if(QUICK_PLATFORM_GLFW)
     set(GLFW_INSTALL OFF CACHE INTERNAL "Generate installation target")
     FetchContent_MakeAvailable(glfw)
 
-    set(QUICK_INCLUDES ${QUICK_INCLUDES} ${glfw_SOURCE_DIRS}/include)
+    set(QUICK_INCLUDES ${QUICK_INCLUDES} ${glfw_SOURCE_DIR}/include)
     set(QUICK_LIBS ${QUICK_LIBS} glfw)
 
 
@@ -147,6 +145,6 @@ target_include_directories(quick
     ${QUICK_INCLUDES}
 )
 
-target_sources(quick
+target_sources(quick PRIVATE
     ${QUICK_SOURCE}
 )

@@ -111,7 +111,6 @@ elseif(QUICK_PLATFORM_SDL2)
 			)
     FetchContent_MakeAvailable(sdl2)
 
-    set(QUICK_INCLUDES ${QUICK_INCLUDES} ${sdl2_SOURCE_DIRS}/include)
     set(QUICK_LIBS ${QUICK_LIBS} SDL2main SDL2-static)
 
 endif()
@@ -125,8 +124,8 @@ add_library(quick
 )
 
 target_link_libraries(quick 
-    PUBLIC $
-    {QUICK_LIBS}
+    PUBLIC 
+    ${QUICK_LIBS}
 )
 
 target_include_directories(quick

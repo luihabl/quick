@@ -14,8 +14,8 @@ namespace quick
         void terminate();
 
     protected:        
-
-        ImVec4 clear_color;
+        //Used to setup. Executed once before main loop.
+        virtual void start() {};       
 
         //Used to draw ImGui stuff and other updates. 
         virtual void update() {};
@@ -24,6 +24,7 @@ namespace quick
         virtual void draw() {};
 
     private:
+        ImVec4 clear_color;
         bool m_quit = false;
         bool should_quit();
 

@@ -8,11 +8,15 @@
 
 #include <stdio.h>
 
+#include <chrono>
+#include <thread>
+
 #define STR2(X) #X
 #define STR(X) STR2(X)
 #define GL_VERSION_MAJOR 3
 #define GL_VERISON_MINOR 3
 
+#define TARGET_FPS 60.0f
 
 namespace 
 {
@@ -71,16 +75,24 @@ namespace quick
         // Remove this
         clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 
+        start();
+
         return true;
     }
 
 
     void Application::run()
     {
+        using dsec = std::chrono::duration<double>;
+        std::chrono::system_clock::duration frame_dt = std::chrono::round<std::chrono::system_clock::duration>(dsec{1./TARGET_FPS});
+        auto begin_frame = std::chrono::system_clock::now();
+        auto end_frame = begin_frame + frame_dt;
+
         while(!should_quit())
         {
-            glfwPollEvents();
-
+            glfwWaitEventsTimeout(1.0f / (6 * TARGET_FPS)); // Wait for 1/6th of the frame dt for events
+            // glfwPollEvents();
+            
             draw();
 
             ImGui_ImplOpenGL3_NewFrame();
@@ -98,6 +110,10 @@ namespace quick
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
             glfwSwapBuffers(window);
+
+            std::this_thread::sleep_until(end_frame);
+            begin_frame = end_frame;
+            end_frame = begin_frame + frame_dt;
 
         }
     }

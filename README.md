@@ -21,3 +21,44 @@ add_subdirectory(path/to/quick)
 
 target_link_libraries(<target_name> quick)
 ```
+
+## Usage
+
+```cpp
+
+#include <quick.h>
+
+class MyApp : public quick::Application
+{
+    void start()
+    {
+        // Setup app (example)
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+        io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
+
+        ImGui::StyleColorsClassic();
+    }
+    
+    void update()
+    {
+        // Draw ImGui elements (example)
+        ImGui::ShowDemoWindow();
+    }
+
+};
+
+int main()
+{
+    auto app = MyApp();
+    if(!app.setup())
+    {
+        return 1;
+    }
+    app.run();
+    app.terminate();  
+        
+    return 0;
+}
+
+
+```

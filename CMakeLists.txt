@@ -21,6 +21,7 @@ set(QUICK_INCLUDES "")
 
 set(FETCHCONTENT_QUIET FALSE)
 
+
 #Dear ImGui
 FetchContent_Declare(
     imgui
@@ -52,7 +53,6 @@ elseif(QUICK_PLATFORM_SDL2)
 endif()
 
 
-
 #ImPlot
 FetchContent_Declare(
     implot
@@ -70,7 +70,6 @@ set(QUICK_SOURCE ${QUICK_SOURCE}
 )
 
 
-
 #Glad
 set(QUICK_SOURCE ${QUICK_SOURCE}
     external/glad/src/glad.c    
@@ -78,8 +77,6 @@ set(QUICK_SOURCE ${QUICK_SOURCE}
 set(QUICK_INCLUDES ${QUICK_INCLUDES} 
     external/glad/include
 )
-
-
 
 
 #GLFW
@@ -97,10 +94,8 @@ if(QUICK_PLATFORM_GLFW)
     set(GLFW_BUILD_DOCS OFF CACHE INTERNAL "Build the GLFW documentation")
     set(GLFW_INSTALL OFF CACHE INTERNAL "Generate installation target")
     FetchContent_MakeAvailable(glfw)
-
-    set(QUICK_INCLUDES ${QUICK_INCLUDES} ${glfw_SOURCE_DIR}/include)
+    
     set(QUICK_LIBS ${QUICK_LIBS} glfw)
-
 
 
 #SDL2
@@ -122,7 +117,6 @@ elseif(QUICK_PLATFORM_SDL2)
 endif()
 
 
-
 # Source code ===========================================================================
 
 #Main code
@@ -130,13 +124,16 @@ add_library(quick
     src/application.cpp
 )
 
-target_link_libraries(quick PRIVATE ${QUICK_LIBS})
+target_link_libraries(quick 
+    PUBLIC $
+    {QUICK_LIBS}
+)
 
 target_include_directories(quick
-	PUBLIC
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-	PRIVATE
-	$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
+    PUBLIC
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    PRIVATE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/src>
 )
 
 #External code

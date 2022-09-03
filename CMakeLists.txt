@@ -18,6 +18,7 @@ option(QUICK_PLATFORM_SDL2 "Use SDL2 platform backend" OFF)
 set(QUICK_LIBS "")
 set(QUICK_SOURCE "")
 set(QUICK_INCLUDES "")
+set(QUICK_DEFINITIONS "")
 
 set(FETCHCONTENT_QUIET FALSE)
 
@@ -82,8 +83,6 @@ set(QUICK_INCLUDES ${QUICK_INCLUDES}
 #GLFW
 if(QUICK_PLATFORM_GLFW)
 
-    add_compile_definitions(QUICK_PLATFORM_GLFW)
-
     FetchContent_Declare(
         glfw
         GIT_REPOSITORY    https://github.com/glfw/glfw.git
@@ -101,10 +100,10 @@ if(QUICK_PLATFORM_GLFW)
         src/application_glfw.cpp
     )
 
+    set(QUICK_DEFINITIONS ${QUICK_DEFINITIONS} QUICK_PLATFORM_GLFW)
+
 #SDL2
 elseif(QUICK_PLATFORM_SDL2)
-
-    add_compile_definitions(QUICK_PLATFORM_SDL2)
 
     FetchContent_Declare(
 				sdl2
@@ -112,6 +111,8 @@ elseif(QUICK_PLATFORM_SDL2)
 				GIT_TAG release-2.24.0 # grab latest stable release
 				GIT_PROGRESS TRUE
 			)
+    set(SDL_TEST_ENABLED_BY_DEFAULT OFF CACHE BOOL "Build the SDL2_test library by default" FORCE)
+    set(SDL_TEST OFF CACHE BOOL "Build the SDL2_test library" FORCE)
     FetchContent_MakeAvailable(sdl2)
 
     set(QUICK_LIBS ${QUICK_LIBS} SDL2main SDL2-static)
@@ -119,6 +120,9 @@ elseif(QUICK_PLATFORM_SDL2)
     set(QUICK_SOURCE ${QUICK_SOURCE}
         src/application_sdl2.cpp
     )
+
+    set(QUICK_DEFINITIONS ${QUICK_DEFINITIONS} QUICK_PLATFORM_SDL2)
+
 
 endif()
 
@@ -148,4 +152,8 @@ target_include_directories(quick
 
 target_sources(quick PRIVATE
     ${QUICK_SOURCE}
+)
+
+target_compile_definitions(quick PUBLIC 
+    ${QUICK_DEFINITIONS}
 )

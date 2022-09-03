@@ -61,6 +61,7 @@ namespace quick
         // ImGui Setup
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         ImGui::StyleColorsDark();
@@ -155,6 +156,7 @@ namespace quick
         // Cleanup
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();
+        ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
         SDL_GL_DeleteContext(gl_context);

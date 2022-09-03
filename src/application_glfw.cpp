@@ -5,6 +5,7 @@
 #include <imgui.h>
 #include <imgui_impl_glfw.h>
 #include <imgui_impl_opengl3.h>
+#include <implot.h>
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
@@ -64,8 +65,8 @@ namespace quick
         // ImGui Setup
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
+        ImPlot::CreateContext();
         ImGuiIO& io = ImGui::GetIO(); (void)io;
-
         ImGui::StyleColorsDark();
 
         // Setup Platform/Renderer backends
@@ -141,6 +142,7 @@ namespace quick
     {
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplGlfw_Shutdown();
+        ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
         glfwDestroyWindow(window);

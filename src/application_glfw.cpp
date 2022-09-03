@@ -1,3 +1,5 @@
+#ifdef QUICK_PLATFORM_GLFW
+
 #include "quick/application.h"
 
 #include <imgui.h>
@@ -150,3 +152,5 @@ namespace quick
 
 
 }
+
+#endif

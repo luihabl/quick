@@ -97,6 +97,9 @@ if(QUICK_PLATFORM_GLFW)
     
     set(QUICK_LIBS ${QUICK_LIBS} glfw)
 
+    set(QUICK_SOURCE ${QUICK_SOURCE}
+        src/application_glfw.cpp
+    )
 
 #SDL2
 elseif(QUICK_PLATFORM_SDL2)
@@ -113,15 +116,17 @@ elseif(QUICK_PLATFORM_SDL2)
 
     set(QUICK_LIBS ${QUICK_LIBS} SDL2main SDL2-static)
 
+    set(QUICK_SOURCE ${QUICK_SOURCE}
+        src/application_sdl2.cpp
+    )
+
 endif()
 
 
 # Source code ===========================================================================
 
 #Main code
-add_library(quick
-    src/application.cpp
-)
+add_library(quick)
 
 target_link_libraries(quick 
     PUBLIC 

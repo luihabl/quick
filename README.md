@@ -30,7 +30,7 @@ target_link_libraries(<target_name> quick)
 
 class MyApp : public quick::Application
 {
-    void start()
+    void start(const Config& config)
     {
         // Setup app (example)
         ImGuiIO& io = ImGui::GetIO(); (void)io;
@@ -50,7 +50,13 @@ class MyApp : public quick::Application
 int main()
 {
     auto app = MyApp();
-    if(!app.setup())
+    
+    auto config = quick::Application::Config();
+    config.name = "MyApp title";
+    config.w = 1920;
+    config.h = 1080;
+
+    if(!app.setup(config))
     {
         return 1;
     }

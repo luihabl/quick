@@ -16,8 +16,6 @@
 #define GL_VERSION_MAJOR 3
 #define GL_VERISON_MINOR 3
 
-#define TARGET_FPS 60.0f
-
 namespace 
 {
     GLFWwindow* window = nullptr;
@@ -32,7 +30,7 @@ static void glfw_error_callback(int error, const char* description)
 namespace quick
 {
 
-    bool Application::setup()
+    bool Application::setup(const Config& config)
     {
         if(window)
             return false;
@@ -48,12 +46,12 @@ namespace quick
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  
     
-        window = glfwCreateWindow(1280, 720, "Dear ImGui GLFW+OpenGL3 example", NULL, NULL);
+        window = glfwCreateWindow(config.w, config.h, config.name.c_str(), NULL, NULL);
         if (!window)
             return false;
 
         glfwMakeContextCurrent(window);
-        glfwSwapInterval(1); // Enable vsync
+        glfwSwapInterval(config.use_vsync ? 1 : 0); // Enable vsync
 
         if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
         {
@@ -72,10 +70,11 @@ namespace quick
         ImGui_ImplGlfw_InitForOpenGL(window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
 
-        // Remove this
-        clear_color = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+        use_framecap = config.use_framecap;
+        fps_target = config.fps_target;
+        clear_color = config.clear_color;
 
-        start();
+        start(config);
 
         return true;
     }
@@ -83,15 +82,19 @@ namespace quick
 
     void Application::run()
     {
-        using dsec = std::chrono::duration<double>;
-        std::chrono::system_clock::duration frame_dt = std::chrono::round<std::chrono::system_clock::duration>(dsec{1./TARGET_FPS});
+        using dsec = std::chrono::duration<float>;
+        std::chrono::system_clock::duration frame_dt = std::chrono::round<std::chrono::system_clock::duration>(dsec{1./fps_target});
         auto begin_frame = std::chrono::system_clock::now();
         auto end_frame = begin_frame + frame_dt;
 
         while(!should_quit())
         {
-            glfwWaitEventsTimeout(1.0f / (6 * TARGET_FPS)); // Wait for 1/6th of the frame dt for events
-            // glfwPollEvents();
+        #ifdef __APPLE__
+            // Wait for 1/6th of the frame dt for events otherwise the window stutters
+            glfwWaitEventsTimeout(1.0f / (6 * fps_target)); 
+        #else
+            glfwPollEvents();
+        #endif
             
             draw();
 
@@ -111,10 +114,12 @@ namespace quick
 
             glfwSwapBuffers(window);
 
-            std::this_thread::sleep_until(end_frame);
-            begin_frame = end_frame;
-            end_frame = begin_frame + frame_dt;
-
+            if (use_framecap)
+            {
+                std::this_thread::sleep_until(end_frame);
+                begin_frame = end_frame;
+                end_frame = begin_frame + frame_dt;
+            }
         }
     }
 

@@ -12,8 +12,8 @@ namespace quick
 
         struct Config
         {
-            int w = 1920;
-            int h = 1080;
+            int w = 1920; // Default width
+            int h = 1080; // Default height
 
             std::string name;
 
@@ -23,9 +23,6 @@ namespace quick
             bool use_framecap = false;
             float fps_target = 60.0f; 
         };
-
-
-
 
         bool setup(const Config& config);
         void run();
@@ -41,6 +38,9 @@ namespace quick
 
         //Used for free OpenGL calls. Do not render ImGui here!
         virtual void draw() {};
+
+        //Used to dispose and finish stuff. Called after leaving the main loop.
+        virtual void end() {};
 
     private:
         bool use_framecap = false;

@@ -138,6 +138,8 @@ namespace quick
                 end_frame = begin_frame + frame_dt;
             }
         }
+
+        end();
     }
 
     bool Application::should_quit()

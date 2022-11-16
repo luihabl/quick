@@ -139,7 +139,7 @@ namespace quick
             }
         }
 
-        end();
+        terminate();
     }
 
     bool Application::should_quit()
@@ -155,6 +155,8 @@ namespace quick
 
     void Application::terminate()
     {
+        end();
+
         // Cleanup
         ImGui_ImplOpenGL3_Shutdown();
         ImGui_ImplSDL2_Shutdown();

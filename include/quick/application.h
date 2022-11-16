@@ -27,7 +27,6 @@ namespace quick
         bool setup(const Config& config);
         void run();
         void quit();
-        void terminate();
 
     protected:        
         //Used to setup. Executed once before main loop.
@@ -49,6 +48,6 @@ namespace quick
         ImVec4 clear_color;
         bool m_quit = false;
         bool should_quit();
-
+        void terminate();
     };
 }

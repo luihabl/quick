@@ -12,15 +12,32 @@ Quick and simple C++ GUIs using Dear ImGui and ImPlot ✨.
 
 The library is built using CMake (>3.14). All dependencies are downloaded automatically using [CMake FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html) so no need of downloading and building the dependencies manually. 
 
-To create a new project using the library simply do
+To create a new project using the library simply clone the repository and add to it the directory to your cmake file as
 
 ```cmake 
 add_subdirectory(path/to/quick)
 
-(...)
+# (...)
 
 target_link_libraries(<target_name> quick)
 ```
+
+or, using `FetchContent`, you can do
+
+```cmake 
+include(FetchContent)
+FetchContent_Declare(
+    quick
+    GIT_REPOSITORY    https://github.com/luihabl/quick.git
+    GIT_TAG           origin/main
+)
+FetchContent_MakeAvailable(quick)
+
+# (...)
+
+target_link_libraries(<target_name> quick)
+```
+
 
 ## Usage
 

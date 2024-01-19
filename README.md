@@ -78,7 +78,6 @@ int main()
         return 1;
     }
     app.run();
-    app.terminate();  
         
     return 0;
 }

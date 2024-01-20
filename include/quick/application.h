@@ -22,11 +22,13 @@ namespace quick
             bool use_vsync = true;
             bool use_framecap = false;
             float fps_target = 60.0f; 
+            bool render_on_resize = false;
         };
 
         bool setup(const Config& config);
         void run();
         void quit();
+        void render();
 
     protected:        
         //Used to setup. Executed once before main loop.

@@ -29,10 +29,19 @@ static void glfw_error_callback(int error, const char* description)
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
 }
 
+static void glfw_resize_callback(GLFWwindow* window, int width, int height)
+{
+    glViewport(0, 0, width, height);
+
+    auto* app = glfwGetWindowUserPointer(window);
+    if(app) 
+    {
+        ((quick::Application*) app)->render();
+    }
+}
 
 namespace quick
 {
-
     bool Application::setup(const Config& config)
     {
         if(window)
@@ -61,7 +70,13 @@ namespace quick
             printf("Failed to load GL functions");
             return false;
         }
-        
+
+        if(config.render_on_resize) 
+        {
+            glfwSetWindowUserPointer(window, this);
+            glfwSetFramebufferSizeCallback(window, glfw_resize_callback);
+        }
+
         // ImGui Setup
         IMGUI_CHECKVERSION();
         ImGui::CreateContext();
@@ -82,6 +97,27 @@ namespace quick
         return true;
     }
 
+    void Application::render()
+    {
+        draw();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplGlfw_NewFrame();
+        ImGui::NewFrame();
+
+        update();
+        
+        ImGui::Render();
+        int display_w, display_h;
+        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glViewport(0, 0, display_w, display_h);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        glfwSwapBuffers(window);
+    }
+
 
     void Application::run()
     {
@@ -99,23 +135,7 @@ namespace quick
             glfwPollEvents();
         #endif
             
-            draw();
-
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplGlfw_NewFrame();
-            ImGui::NewFrame();
-
-            update();
-            
-            ImGui::Render();
-            int display_w, display_h;
-            glfwGetFramebufferSize(window, &display_w, &display_h);
-            glViewport(0, 0, display_w, display_h);
-            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-            glfwSwapBuffers(window);
+            render();
 
             if (use_framecap)
             {

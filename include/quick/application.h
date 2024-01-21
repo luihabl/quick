@@ -2,6 +2,7 @@
 
 #include <imgui.h>
 #include <string>
+#include <memory>
 
 namespace quick
 {
@@ -29,6 +30,9 @@ namespace quick
         void run();
         void quit();
         void render();
+        
+        Application();
+        ~Application();
 
     protected:        
         //Used to setup. Executed once before main loop.
@@ -51,5 +55,8 @@ namespace quick
         bool m_quit = false;
         bool should_quit();
         void terminate();
+
+        struct Impl;  
+        std::unique_ptr<Impl> impl;
     };
 }

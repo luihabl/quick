@@ -19,11 +19,6 @@
 #define GL_VERSION_MAJOR 3
 #define GL_VERISON_MINOR 3
 
-namespace 
-{
-    GLFWwindow* window = nullptr;
-}
-
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -42,9 +37,19 @@ static void glfw_resize_callback(GLFWwindow* window, int width, int height)
 
 namespace quick
 {
+    struct Application::Impl 
+    {
+        GLFWwindow* window = nullptr;
+    };
+
+    Application::Application() = default;
+    Application::~Application() = default;
+
     bool Application::setup(const Config& config)
     {
-        if(window)
+        impl = std::make_unique<Impl>();
+
+        if(impl->window)
             return false;
 
         glfwSetErrorCallback(glfw_error_callback);
@@ -58,11 +63,11 @@ namespace quick
         glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
         glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);  
     
-        window = glfwCreateWindow(config.w, config.h, config.name.c_str(), NULL, NULL);
-        if (!window)
+        impl->window = glfwCreateWindow(config.w, config.h, config.name.c_str(), NULL, NULL);
+        if (!impl->window)
             return false;
 
-        glfwMakeContextCurrent(window);
+        glfwMakeContextCurrent(impl->window);
         glfwSwapInterval(config.use_vsync ? 1 : 0); // Enable vsync
 
         if(!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
@@ -73,8 +78,8 @@ namespace quick
 
         if(config.render_on_resize) 
         {
-            glfwSetWindowUserPointer(window, this);
-            glfwSetFramebufferSizeCallback(window, glfw_resize_callback);
+            glfwSetWindowUserPointer(impl->window, this);
+            glfwSetFramebufferSizeCallback(impl->window, glfw_resize_callback);
         }
 
         // ImGui Setup
@@ -85,7 +90,7 @@ namespace quick
         ImGui::StyleColorsDark();
 
         // Setup Platform/Renderer backends
-        ImGui_ImplGlfw_InitForOpenGL(window, true);
+        ImGui_ImplGlfw_InitForOpenGL(impl->window, true);
         ImGui_ImplOpenGL3_Init(glsl_version);
 
         use_framecap = config.use_framecap;
@@ -109,13 +114,13 @@ namespace quick
         
         ImGui::Render();
         int display_w, display_h;
-        glfwGetFramebufferSize(window, &display_w, &display_h);
+        glfwGetFramebufferSize(impl->window, &display_w, &display_h);
         glViewport(0, 0, display_w, display_h);
         glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
         glClear(GL_COLOR_BUFFER_BIT);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-        glfwSwapBuffers(window);
+        glfwSwapBuffers(impl->window);
     }
 
 
@@ -150,13 +155,13 @@ namespace quick
 
     bool Application::should_quit()
     {
-        return glfwWindowShouldClose(window) || m_quit;
+        return glfwWindowShouldClose(impl->window) || m_quit;
     }
 
 
     void Application::quit()
     {
-        glfwSetWindowShouldClose(window, GLFW_TRUE);
+        glfwSetWindowShouldClose(impl->window, GLFW_TRUE);
         m_quit = true;
     }
 
@@ -169,8 +174,8 @@ namespace quick
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
-        glfwDestroyWindow(window);
-        window = nullptr;
+        glfwDestroyWindow(impl->window);
+        impl->window = nullptr;
 
         glfwTerminate();
     }

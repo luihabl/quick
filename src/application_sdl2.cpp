@@ -84,6 +84,37 @@ namespace quick
         return true;
     }
 
+    void Application::render()
+    {
+        ImGuiIO& io = ImGui::GetIO(); (void)io;
+
+        draw();
+
+        ImGui_ImplOpenGL3_NewFrame();
+        ImGui_ImplSDL2_NewFrame();
+        ImGui::NewFrame();
+
+        update();
+        
+        // Rendering
+        ImGui::Render();
+        glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
+        glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
+        glClear(GL_COLOR_BUFFER_BIT);
+        ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
+
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
+            SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
+            ImGui::UpdatePlatformWindows();
+            ImGui::RenderPlatformWindowsDefault();
+            SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
+        }
+
+        SDL_GL_SwapWindow(impl->window);
+    }
+
 
     void Application::run()
     {
@@ -91,8 +122,6 @@ namespace quick
         std::chrono::system_clock::duration frame_dt = std::chrono::round<std::chrono::system_clock::duration>(dsec{1./fps_target});
         auto begin_frame = std::chrono::system_clock::now();
         auto end_frame = begin_frame + frame_dt;
-
-        ImGuiIO& io = ImGui::GetIO(); (void)io;
 
         while(!should_quit())
         {
@@ -107,31 +136,7 @@ namespace quick
                     m_quit = true;
             }
             
-            draw();
-
-            ImGui_ImplOpenGL3_NewFrame();
-            ImGui_ImplSDL2_NewFrame();
-            ImGui::NewFrame();
-
-            update();
-            
-            // Rendering
-            ImGui::Render();
-            glViewport(0, 0, (int)io.DisplaySize.x, (int)io.DisplaySize.y);
-            glClearColor(clear_color.x * clear_color.w, clear_color.y * clear_color.w, clear_color.z * clear_color.w, clear_color.w);
-            glClear(GL_COLOR_BUFFER_BIT);
-            ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
-
-            if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-            {
-                SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
-                SDL_GLContext backup_current_context = SDL_GL_GetCurrentContext();
-                ImGui::UpdatePlatformWindows();
-                ImGui::RenderPlatformWindowsDefault();
-                SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
-            }
-
-            SDL_GL_SwapWindow(impl->window);
+            render();
 
             if (use_framecap)
             {

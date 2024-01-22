@@ -23,6 +23,8 @@ namespace quick
             bool use_vsync = true;
             bool use_framecap = false;
             float fps_target = 60.0f; 
+
+            // Not available for SDL2 backend
             bool render_on_resize = false;
         };
 

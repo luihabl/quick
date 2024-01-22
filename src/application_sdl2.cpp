@@ -3,8 +3,9 @@
 #include "quick/application.h"
 
 #include <imgui.h>
-#include <imgui_impl_sdl.h>
+#include <imgui_impl_sdl2.h>
 #include <imgui_impl_opengl3.h>
+#include <implot.h>
 #include <glad/glad.h>
 #include <SDL.h>
 
@@ -18,18 +19,23 @@
 #define GL_VERSION_MAJOR 3
 #define GL_VERISON_MINOR 3
 
-namespace 
-{
-    SDL_Window* window = nullptr;
-    SDL_GLContext gl_context;
-}
-
 namespace quick
 {
 
+    struct Application::Impl 
+    {
+        SDL_Window* window = nullptr;
+        SDL_GLContext gl_context;
+    };
+
+    Application::Application() = default;
+    Application::~Application() = default;
+
     bool Application::setup(const Config& config)
     {
-        if(window)
+        impl = std::make_unique<Impl>();
+
+        if(impl->window)
             return false;
 
         if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER | SDL_INIT_GAMECONTROLLER) != 0)
@@ -46,10 +52,10 @@ namespace quick
         SDL_GL_SetAttribute(SDL_GL_CONTEXT_FLAGS, SDL_GL_CONTEXT_FORWARD_COMPATIBLE_FLAG); // Always required on Mac
 
         SDL_WindowFlags window_flags = (SDL_WindowFlags)(SDL_WINDOW_OPENGL | SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI);
-        window = SDL_CreateWindow(config.name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, config.w, config.h, window_flags);
+        impl->window = SDL_CreateWindow(config.name.c_str(), SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, config.w, config.h, window_flags);
 
-        gl_context = SDL_GL_CreateContext(window);
-        SDL_GL_MakeCurrent(window, gl_context);
+        impl->gl_context = SDL_GL_CreateContext(impl->window);
+        SDL_GL_MakeCurrent(impl->window, impl->gl_context);
         SDL_GL_SetSwapInterval(config.use_vsync ? 1 : 0); // Enable vsync
 
         if(!gladLoadGLLoader((GLADloadproc) SDL_GL_GetProcAddress))
@@ -66,8 +72,7 @@ namespace quick
 
         ImGui::StyleColorsDark();
 
-        // Setup Platform/Renderer backends
-        ImGui_ImplSDL2_InitForOpenGL(window, gl_context);
+        ImGui_ImplSDL2_InitForOpenGL(impl->window, impl->gl_context);
         ImGui_ImplOpenGL3_Init(glsl_version);
 
         use_framecap = config.use_framecap;
@@ -98,7 +103,7 @@ namespace quick
                 ImGui_ImplSDL2_ProcessEvent(&event);
                 if (event.type == SDL_QUIT)
                     m_quit = true;
-                if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(window))
+                if (event.type == SDL_WINDOWEVENT && event.window.event == SDL_WINDOWEVENT_CLOSE && event.window.windowID == SDL_GetWindowID(impl->window))
                     m_quit = true;
             }
             
@@ -117,9 +122,6 @@ namespace quick
             glClear(GL_COLOR_BUFFER_BIT);
             ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-            // Update and Render additional Platform Windows
-            // (Platform functions may change the current OpenGL context, so we save/restore it to make it easier to paste this code elsewhere.
-            //  For this specific demo app we could also call SDL_GL_MakeCurrent(window, gl_context) directly)
             if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
             {
                 SDL_Window* backup_current_window = SDL_GL_GetCurrentWindow();
@@ -129,7 +131,7 @@ namespace quick
                 SDL_GL_MakeCurrent(backup_current_window, backup_current_context);
             }
 
-            SDL_GL_SwapWindow(window);
+            SDL_GL_SwapWindow(impl->window);
 
             if (use_framecap)
             {
@@ -163,8 +165,8 @@ namespace quick
         ImPlot::DestroyContext();
         ImGui::DestroyContext();
 
-        SDL_GL_DeleteContext(gl_context);
-        SDL_DestroyWindow(window);
+        SDL_GL_DeleteContext(impl->gl_context);
+        SDL_DestroyWindow(impl->window);
         SDL_Quit();
     }
 

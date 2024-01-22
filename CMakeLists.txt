@@ -49,7 +49,7 @@ if(QUICK_PLATFORM_GLFW)
     )
 elseif(QUICK_PLATFORM_SDL2)
     set(QUICK_SOURCE ${QUICK_SOURCE}
-        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl.cpp
+        ${imgui_SOURCE_DIR}/backends/imgui_impl_sdl2.cpp
     )
 endif()
 
